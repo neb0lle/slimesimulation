@@ -27,27 +27,18 @@ void Update(Agent &agent){
     DrawPixelV(agent.position,WHITE);
 }
 int main(){
-    // SetConfigFlags(FLAG_MSAA_4X_HINT);
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(250,250,"slime");
     SetTargetFPS(60);
     ClearBackground(BLACK);
-
-    // for(int i=0;i<250;++i){
-    //    for(int j=0;j<250;++j){
-    //         Color temp = {255,255,255,(float)hash_func(i*250+j)/4294967295.0*255};
-    //         DrawPixel(i,j,temp);
-    //      }
-    // }
-    //
-    Agent kun = {{125,125},{cos(0),sin(45*PI/180)}};
+    for(int i=0;i<250;++i){
+       for(int j=0;j<250;++j){
+            Color temp = {255,255,255,(float)hash_func(i*250+j)/4294967295.0*255};
+            DrawPixel(i,j,temp);
+         }
+    }
     while(!WindowShouldClose()){
         BeginDrawing();
-        Update(kun);
         EndDrawing();
-        for(int i=0;i<250;++i){
-            for(int j=0;j<250;++j){
-
-            }
-        }
     }
 }
