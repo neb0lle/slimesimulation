@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(spirograph)
+project(sed)
 
 find_package(raylib 3.0 REQUIRED) # Requires at least version 3.0
 
