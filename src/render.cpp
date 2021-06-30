@@ -2,8 +2,8 @@
 #include <raylib.h>
 #include "render.h"
 
-const int RES = 500;
-Color *pixels = (Color *)malloc(500*500*sizeof(Color));
+const int RES = 1000;
+Color *pixels = (Color *)malloc(RES*RES*sizeof(Color));
 
 uint hash_func(uint state){
     state ^= 2747636419u;
@@ -22,6 +22,14 @@ float hash_scale(uint state){
 
 void TexPixDraw(int x,int y, Color col){
     pixels[y*RES+x] = col;
+}
+
+void CLS(){
+    for(int i=0;i<RES;++i){
+        for(int j=0;j<RES;++j){
+            pixels[i*RES+j] = BLACK;
+        }
+    }
 }
 
 void DiffuseTexture(){
