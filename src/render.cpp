@@ -2,7 +2,7 @@
 #include <raylib.h>
 #include "render.h"
 
-const int RES = 1000;
+const int RES = 2000;
 Color *pixels = (Color *)malloc(RES*RES*sizeof(Color));
 
 uint hash_func(uint state){
@@ -36,11 +36,9 @@ void DiffuseTexture(){
     float diffstrength = 3;
     for(int i=0;i<RES;++i){
         for(int j=0;j<RES;++j){
-            if(pixels[i*RES+j].r>0){
-                pixels[i*RES+j].r -= diffstrength;
-                pixels[i*RES+j].g -= diffstrength;
-                pixels[i*RES+j].b -= diffstrength;
-            }
+            pixels[i*RES+j].r -= diffstrength;
+            pixels[i*RES+j].g -= diffstrength;
+            pixels[i*RES+j].b -= diffstrength;
         }
     }
 }

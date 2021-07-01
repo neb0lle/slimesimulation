@@ -5,7 +5,7 @@
 #include "render.h"
 using namespace std;
 
-const int RES=1000;
+const int RES=2000;
 
 struct Agent{
     Vector2 position;
@@ -13,25 +13,8 @@ struct Agent{
 };
 
 vector<Agent> agent_list;
-// vector<Agent> agent_list = {
-//     {{100,100},{1,0.8}},
-//     {{200,500},{0.4,0.3}},
-//     {{300,400},{0.5,0.4}},
-//     {{400,300},{0.6,0.5}},
-//     {{500,200},{0.7,0.6}},
-//     {{400,100},{0.8,0.2}},
-// };
 
 extern Color *pixels;
-
-// void AgentInit(int n){  //min 4
-//     for(int i=(RES/2)-(n/4);i<(RES/2)+(n/4);++i){
-//         for(int j=(RES/2)-(n/4);j<(RES/2)+(n/4);++j){
-//             float randangle =hash_scale(hash_func(i*RES+j))*360*M_PI/180;
-//             agent_list.push_back(Agent{{(float)i,(float)j},{cos(randangle),sin(randangle),static_cast<float>(randangle*180/M_PI)}});
-//         }
-//     }
-// }
 
 void AgentInit(float x, float y){
     float randangle =hash_scale(hash_func(y*RES+x))*360*M_PI/180;
@@ -80,11 +63,15 @@ void AgentSense(Agent &agent){
         l = {-1,0};
     }
     
-    if(pixels[static_cast<int>((agent.position.y+r.y)*RES+agent.position.x+r.x)].r > 0){
-        agent.angle.z += 1;
-    }
-    agent.angle.x = acos(agent.angle.z*M_PI/180);
-    agent.angle.y = asin(agent.angle.z*M_PI/180);
+    // TexPixDraw(agent.position.x+sensPos.x,agent.position.y+sensPos.y,YELLOW);
+    // TexPixDraw(agent.position.x+r.x,agent.position.y+r.y,RED);
+    // TexPixDraw(agent.position.x+l.x,agent.position.y+l.y,BLUE);
+    
+    // if(pixels[static_cast<int>((agent.position.y+r.y)*RES+agent.position.x+r.x)].r > 0){
+    //     agent.angle.z += 1;
+    // }
+    // agent.angle.x = acos(agent.angle.z*M_PI/180);
+    // agent.angle.y = asin(agent.angle.z*M_PI/180);
 }
 
 void UpdateData(Agent &agent){
@@ -96,11 +83,18 @@ void UpdateData(Agent &agent){
     TexPixDraw(agent.position.x,agent.position.y,WHITE);
 }
 
+void RandomAgentGenerator(int x){
+    for(int b=0;b<x;++b){
+        float rango =hash_scale(hash_func(GetRandomValue(0,RES)))*360*M_PI/180;
+        agent_list.push_back(Agent{{static_cast<float>(GetRandomValue(0,RES)),static_cast<float>(GetRandomValue(0,RES))},
+                                   {cos(rango),sin(rango),static_cast<float>(rango*180/M_PI)}}); 
+    }
+}
 
 int main()
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT); 
-    SetTargetFPS(120);
+    SetTargetFPS(60);
     InitWindow(RES, RES, "sed");
     Image tuxim = {
         .data = pixels,
@@ -113,8 +107,10 @@ int main()
     UnloadImage(tuxim);
     ClearBackground(BLACK);
     CLS();
+    RandomAgentGenerator(1000000);
 
     while (!WindowShouldClose()){
+        // INPUT HANDLING
         if(GetGestureDetected()==GESTURE_DRAG){
             Vector2 mousePos = GetMousePosition();
             AgentInit(mousePos.x,mousePos.y);
