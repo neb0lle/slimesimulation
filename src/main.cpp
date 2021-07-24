@@ -5,7 +5,7 @@
 #include "render.h"
 using namespace std;
 
-const int RES=2000;
+const int RES=1000;
 
 struct Agent{
     Vector2 position;
@@ -107,7 +107,7 @@ int main()
     UnloadImage(tuxim);
     ClearBackground(BLACK);
     CLS();
-    RandomAgentGenerator(1000000);
+    RandomAgentGenerator(100);
 
     while (!WindowShouldClose()){
         // INPUT HANDLING

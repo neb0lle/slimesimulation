@@ -2,7 +2,7 @@
 #include <raylib.h>
 #include "render.h"
 
-const int RES = 2000;
+const int RES = 1000;
 Color *pixels = (Color *)malloc(RES*RES*sizeof(Color));
 
 uint hash_func(uint state){
