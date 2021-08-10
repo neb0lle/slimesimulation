@@ -19,6 +19,7 @@ extern Color *pixels;
 void AgentInit(float x, float y){
     float randangle =hash_scale(hash_func(y*RES+x))*360*M_PI/180;
     agent_list.push_back(Agent{{x,y},{cos(randangle),sin(randangle),static_cast<float>(randangle*180/M_PI)}});
+    
 }
 
 int Signum(float x){
