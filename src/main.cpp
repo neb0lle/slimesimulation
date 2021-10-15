@@ -18,6 +18,8 @@ vector<Agent> agent_list;
 extern Color *pixels; // import pixel array from render.cpp
 
 
+void Sense(Agent &agent);
+
 void UpdateData(Agent &agent){
     agent.position.x += agent.angle.x; 
     agent.position.y += agent.angle.y; 
@@ -38,14 +40,19 @@ void UpdateData(Agent &agent){
 	else agent.is_oob.second = false;
 	for(int k=-1; k<2; ++k){
 		TexPixDraw(agent.position.x+k,agent.position.y,WHITE);
-		TexPixDraw(agent.position.x,agent.position.y+1,WHITE);
+		TexPixDraw(agent.position.x,agent.position.y+k,WHITE);
 	}
+	Sense(agent);
 }
 
 void Sense(Agent &agent){
-	float m = agent.angle.x/agent.angle.y;	
-	float lsum = 0;
-	float rsum = 0;
+	int max_intensity = 0;
+	if(agent.angle.x>0 && agent.angle.y>0){
+		for(int i=0; i<3; ++i){
+			for(int j=0; j<3; ++j){
+			}
+		}
+	}
 }
 
 // Initialize induvigual agents with random angle
@@ -56,13 +63,13 @@ void AgentInit(float x, float y){
 }
 
 // Initial bulk generation of agents with random angle
-void RandomAgentGenerator(int x){
+void RandomAgentGenerator(int x, int rangl=0, int rangr=RES){
     for(int b=0;b<x;++b){
-        float rango =hash_scale(hash_func(GetRandomValue(0,RES)))*360*M_PI/180;
+        float rango =hash_scale(hash_func(GetRandomValue(rangl,rangr)))*360*M_PI/180;
 		agent_list.push_back(Agent{
 				{
-					static_cast<float>(GetRandomValue(0,RES)),
-					static_cast<float>(GetRandomValue(0,RES))
+					static_cast<float>(GetRandomValue(rangl,rangr)),
+					static_cast<float>(GetRandomValue(rangl,rangr))
 				},
 				{cos(rango)*2,sin(rango)*2},
 				{false,false}}
@@ -86,7 +93,7 @@ int main()
     UnloadImage(tuxim);
     ClearBackground(BLACK);
     CLS();
-    RandomAgentGenerator(100);
+    RandomAgentGenerator(1000,450,550);
 
     while (!WindowShouldClose()){
         // INPUT HANDLING

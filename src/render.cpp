@@ -3,7 +3,7 @@
 #include "render.h"
 
 const int RES = 1000;
-Color *pixels = (Color *)malloc(RES*RES*2*sizeof(Color)); // 2 for doubling the linear matrix size to avoid segmentation faults
+Color *pixels = (Color *)malloc(RES*RES*sizeof(Color)); // 2 for doubling the linear matrix size to avoid segmentation faults
 
 uint hash_func(uint state){
     state ^= 2747636419u;
@@ -33,7 +33,7 @@ void CLS(){
 }
 
 void DiffuseTexture(){
-    float diffstrength = 1;
+    float diffstrength = 10;
     for(int i=0;i<RES;++i){
         for(int j=0;j<RES;++j){
 			// diffuse each pixel value intensity each frame (all 3 components)
