@@ -18,7 +18,7 @@ extern Color *pixels; // import pixel array from render.cpp
 
 void Sense(Agent &agent);
 
-void UpdateData(Agent &agent,int speed=1) {
+void UpdateData(Agent &agent,float speed=1) {
     agent.position.x += agent.angle.x*speed;
     agent.position.y += agent.angle.y*speed;
 
@@ -39,23 +39,6 @@ void UpdateData(Agent &agent,int speed=1) {
         agent.angle.y *= -1;
         agent.position.y = RES;
     }
-
-    // more complex method (considering out of bounds)
-    // if(agent.position.x<0 || agent.position.x>=RES) {
-    //     if(agent.is_oob.first == false) {
-    //         agent.angle.x *= -1;
-    //         agent.is_oob.first = true;
-    //     }
-    // }
-    // else agent.is_oob.first = false;
-    // if(agent.position.y<0 || agent.position.y>=RES) {
-    //     if(agent.is_oob.second == false) {
-    //         agent.angle.y *= -1;
-    //         agent.is_oob.second = true;
-    //     }
-    // }
-    // else agent.is_oob.second = false;
-
 
     for(int k=-1; k<2; ++k) {
         TexPixDraw(agent.position.x+k,agent.position.y,WHITE);
@@ -108,7 +91,7 @@ int main()
     UnloadImage(tuxim);
     ClearBackground(BLACK);
     CLS();
-    RandomAgentGenerator(1000,450,550);
+    // RandomAgentGenerator(10000,350,650);
 
     while (!WindowShouldClose()) {
         // INPUT HANDLING
@@ -117,11 +100,13 @@ int main()
             AgentInit(mousePos.x,mousePos.y);
         }
 
+        RandomAgentGenerator(10,0,RES);
+
         DiffuseTexture();
         BeginDrawing();
         DrawTexture(tux,0,0,WHITE);
         for(int k=0; k<agent_list.size(); ++k) {
-            UpdateData(agent_list[k],2);
+            UpdateData(agent_list[k],.5);
         }
         EndDrawing();
         UpdateTexture(tux,pixels);
