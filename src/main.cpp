@@ -10,7 +10,6 @@ const int RES=1000;
 struct Agent {
     Vector2 position;
     Vector2 angle;
-    // pair<bool,bool> is_oob;
 };
 
 vector<Agent> agent_list;
@@ -19,9 +18,9 @@ extern Color *pixels; // import pixel array from render.cpp
 
 void Sense(Agent &agent);
 
-void UpdateData(Agent &agent) {
-    agent.position.x += agent.angle.x;
-    agent.position.y += agent.angle.y;
+void UpdateData(Agent &agent,int speed=1) {
+    agent.position.x += agent.angle.x*speed;
+    agent.position.y += agent.angle.y*speed;
 
     // primitive method (not considering out of bounds)
     if(agent.position.x<=0) {
@@ -32,13 +31,13 @@ void UpdateData(Agent &agent) {
         agent.angle.x *= -1;
         agent.position.x = RES;
     }
-    if(agent.position.x<=0) {
-        agent.angle.x *= -1;
-        agent.position.x = 0;
+    if(agent.position.y<=0) {
+        agent.angle.y *= -1;
+        agent.position.y = 0;
     }
-    else if (agent.position.x>=RES) {
-        agent.angle.x *= -1;
-        agent.position.x = RES;
+    else if (agent.position.y>=RES) {
+        agent.angle.y *= -1;
+        agent.position.y = RES;
     }
 
     // more complex method (considering out of bounds)
@@ -56,40 +55,40 @@ void UpdateData(Agent &agent) {
     //     }
     // }
     // else agent.is_oob.second = false;
+
+
     for(int k=-1; k<2; ++k) {
         TexPixDraw(agent.position.x+k,agent.position.y,WHITE);
         TexPixDraw(agent.position.x,agent.position.y+k,WHITE);
     }
-    Sense(agent);
+    // Sense(agent);
 }
 
-void Sense(Agent &agent) {
-    int max_intensity = 0;
-    if(agent.angle.x>0 && agent.angle.y>0) {
-        for(int i=0; i<3; ++i) {
-            for(int j=0; j<3; ++j) {
-            }
-        }
-    }
-}
+// void Sense(Agent &agent) {
+//     int max_intensity = 0;
+//     if(agent.angle.x>0 && agent.angle.y>0) {
+//         for(int i=0; i<3; ++i) {
+//             for(int j=0; j<3; ++j) {
+//             }
+//         }
+//     }
+// }
 
-// Initialize induvigual agents with random angle
+// Initialize induvigual agents with random angle at x,y
 void AgentInit(float x, float y) {
-    float randangle =hash_scale(hash_func(y*RES+x))*360*M_PI/180;
-    agent_list.push_back(Agent{{x,y},{cos(randangle),sin(randangle)}});
-
+    int randangle = GetRandomValue(0,360);
+    Vector2 agent_angle = {sin((float)randangle),cos((float)randangle)};
+    agent_list.push_back(Agent{{x,y},agent_angle});
 }
 
 // Initial bulk generation of agents with random angle
-void RandomAgentGenerator(int x, int rangl=0, int rangr=RES) {
-    for(int b=0; b<x; ++b) {
-        float rango =hash_scale(hash_func(GetRandomValue(rangl,rangr)))*360*M_PI/180;
+void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
+    for(int b=0; b<n; ++b) {
+        int randangle = GetRandomValue(0,360);
+        Vector2 agent_angle = {sin((float)randangle),cos((float)randangle)};
         agent_list.push_back(Agent{
-            {
-                static_cast<float>(GetRandomValue(rangl,rangr)),
-                static_cast<float>(GetRandomValue(rangl,rangr))
-            },
-            {cos(rango)*2,sin(rango)*2}});
+            { static_cast<float>(GetRandomValue(rangl,rangr)), static_cast<float>(GetRandomValue(rangl,rangr)) },
+            agent_angle});
     }
 }
 
@@ -122,7 +121,7 @@ int main()
         BeginDrawing();
         DrawTexture(tux,0,0,WHITE);
         for(int k=0; k<agent_list.size(); ++k) {
-            UpdateData(agent_list[k]);
+            UpdateData(agent_list[k],2);
         }
         EndDrawing();
         UpdateTexture(tux,pixels);
