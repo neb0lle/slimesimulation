@@ -1,8 +1,11 @@
+#define _USE_MATH_DEFINES
+
 #include <raylib.h>
 #include <vector>
 #include <cmath>
 #include <iostream>
 #include "render.h"
+
 using namespace std;
 
 const int RES=1000;
@@ -59,16 +62,16 @@ void UpdateData(Agent &agent,float speed=1) {
 
 // Initialize induvigual agents with random angle at x,y
 void AgentInit(float x, float y) {
-    int randangle = GetRandomValue(0,360);
-    Vector2 agent_angle = {sin((float)randangle),cos((float)randangle)};
+    float randangle = GetRandomValue(0,360);
+    Vector2 agent_angle = {sin(randangle),cos(randangle)};
     agent_list.push_back(Agent{{x,y},agent_angle});
 }
 
 // Initial bulk generation of agents with random angle
 void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
     for(int b=0; b<n; ++b) {
-        int randangle = GetRandomValue(0,360);
-        Vector2 agent_angle = {sin((float)randangle),cos((float)randangle)};
+        float randangle = GetRandomValue(0,360);
+        Vector2 agent_angle = {sin(randangle),cos(randangle)};
         agent_list.push_back(Agent{
             { static_cast<float>(GetRandomValue(rangl,rangr)), static_cast<float>(GetRandomValue(rangl,rangr)) },
             agent_angle});
