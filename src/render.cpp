@@ -16,6 +16,10 @@ uint hash_func(uint state) {
     // max: 4294967295
 }
 
+Color pdata(int x,int y) {
+    return pixels[x*RES+y];
+}
+
 float hash_scale(uint state) {
     return state / 4294967295.0;
 }
@@ -32,8 +36,7 @@ void CLS() {
     }
 }
 
-void DiffuseTexture() {
-    float diffstrength = 10;
+void DiffuseTexture(float diffstrength) {
     for(int i=0; i<RES; ++i) {
         for(int j=0; j<RES; ++j) {
             // diffuse each pixel value intensity each frame (all 3 components)
