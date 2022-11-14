@@ -112,7 +112,7 @@ int main()
             Vector2 mousePos = GetMousePosition();
             AgentInit(mousePos.x,mousePos.y);
         }
-        DiffuseTexture(100);
+        DiffuseTexture(10);
         BeginDrawing();
         DrawTexture(tux,0,0,WHITE);
         for(int k=0; k<agent_list.size(); ++k) {
