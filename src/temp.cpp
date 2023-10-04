@@ -1,0 +1,144 @@
+struct Agent {
+    float2 position;
+    float angle;
+    int4 speciesMask;
+    int speciesIndex; // rendering z value on screen
+};
+
+struct SpeciesSettings {
+    float moveSpeed;
+    float turnSpeed;
+
+    float sensorAngleDegrees;
+    float sensorOffsetDst;
+    int sensorSize;
+    float4 colour;
+};
+
+
+float sense(Agent agent, SpeciesSettings settings, float sensorAngleOffset) {
+    float sensorAngle = agent.angle + sensorAngleOffset;
+    float2 sensorDir = float2(cos(sensorAngle), sin(sensorAngle));
+
+    float2 sensorPos = agent.position + sensorDir * settings.sensorOffsetDst;
+    int sensorCentreX = (int) sensorPos.x;
+    int sensorCentreY = (int) sensorPos.y;
+
+    float sum = 0;
+
+    int4 senseWeight = agent.speciesMask * 2 - 1;
+
+    for (int offsetX = -settings.sensorSize; offsetX <= settings.sensorSize; offsetX ++) {
+        for (int offsetY = -settings.sensorSize; offsetY <= settings.sensorSize; offsetY ++) {
+            int sampleX = min(width - 1, max(0, sensorCentreX + offsetX));
+            int sampleY = min(height - 1, max(0, sensorCentreY + offsetY));
+            sum += dot(senseWeight, TrailMap[int2(sampleX,sampleY)]);
+        }
+    }
+
+    return sum;
+}
+
+void Update (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= numAgents) {
+        return;
+    }
+
+
+    Agent agent = agents[id.x];
+    SpeciesSettings settings = speciesSettings[agent.speciesIndex];
+    float2 pos = agent.position;
+
+    uint random = hash(pos.y * width + pos.x + hash(id.x + time * 100000));
+
+    // Steer based on sensory data
+    float sensorAngleRad = settings.sensorAngleDegrees * (3.1415 / 180);
+    float weightForward = sense(agent, settings, 0);
+    float weightLeft = sense(agent, settings, sensorAngleRad);
+    float weightRight = sense(agent, settings, -sensorAngleRad);
+
+
+    float randomSteerStrength = scaleToRange01(random);
+    float turnSpeed = settings.turnSpeed * 2 * 3.1415;
+
+    // Continue in same direction
+    if (weightForward > weightLeft && weightForward > weightRight) {
+        agents[id.x].angle += 0;
+    }
+    else if (weightForward < weightLeft && weightForward < weightRight) {
+        agents[id.x].angle += (randomSteerStrength - 0.5) * 2 * turnSpeed * deltaTime;
+    }
+    // Turn right
+    else if (weightRight > weightLeft) {
+        agents[id.x].angle -= randomSteerStrength * turnSpeed * deltaTime;
+    }
+    // Turn left
+    else if (weightLeft > weightRight) {
+        agents[id.x].angle += randomSteerStrength * turnSpeed * deltaTime;
+    }
+
+
+    // Update position
+    float2 direction = float2(cos(agent.angle), sin(agent.angle));
+    float2 newPos = agent.position + direction * deltaTime * settings.moveSpeed;
+
+
+    // Clamp position to map boundaries, and pick new random move dir if hit boundary
+    if (newPos.x < 0 || newPos.x >= width || newPos.y < 0 || newPos.y >= height) {
+        random = hash(random);
+        float randomAngle = scaleToRange01(random) * 2 * 3.1415;
+
+        newPos.x = min(width-1,max(0, newPos.x));
+        newPos.y = min(height-1,max(0, newPos.y));
+        agents[id.x].angle = randomAngle;
+    }
+    else {
+        int2 coord = int2(newPos);
+        float4 oldTrail = TrailMap[coord];
+        TrailMap[coord] = min(1, oldTrail + agent.speciesMask * trailWeight * deltaTime);
+    }
+
+    agents[id.x].position = newPos;
+}
+
+void Diffuse (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x < 0 || id.x >= (uint)width || id.y < 0 || id.y >= (uint)height) {
+        return;
+    }
+
+    float4 sum = 0;
+    float4 originalCol = TrailMap[id.xy];
+    // 3x3 blur
+    for (int offsetX = -1; offsetX <= 1; offsetX ++) {
+        for (int offsetY = -1; offsetY <= 1; offsetY ++) {
+            int sampleX = min(width-1, max(0, id.x + offsetX));
+            int sampleY = min(height-1, max(0, id.y + offsetY));
+            sum += TrailMap[int2(sampleX,sampleY)];
+        }
+    }
+
+    float4 blurredCol = sum / 9;
+    float diffuseWeight = saturate(diffuseRate * deltaTime);
+    blurredCol = originalCol * (1 - diffuseWeight) + blurredCol * (diffuseWeight);
+
+    //DiffusedTrailMap[id.xy] = blurredCol * saturate(1 - decayRate * deltaTime);
+    DiffusedTrailMap[id.xy] = max(0, blurredCol - decayRate * deltaTime);
+}
+void UpdateColourMap (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x < 0 || id.x >= (uint)width || id.y < 0 || id.y >= (uint)height) {
+        return;
+    }
+
+    float4 map = TrailMap[id.xy];
+
+    float4 colour = 0;
+    for (uint i = 0; i < numSpecies; i ++) {
+        float4 mask = float4(i==0, i==1, i==2,i==3);
+        colour += speciesSettings[i].colour * dot(map, mask);
+    }
+    ColourMap[id.xy] = colour;
+
+}

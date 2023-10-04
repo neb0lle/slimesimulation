@@ -89,7 +89,7 @@ void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
 int main()
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    SetTargetFPS(60);
+    SetTargetFPS(120);
     InitWindow(RES, RES, "sed");
     Image tuxim = {
         .data = pixels,
@@ -102,17 +102,14 @@ int main()
     UnloadImage(tuxim);
     ClearBackground(BLACK);
     CLS();
-    RandomAgentGenerator(5000,0,RES);
-    float temp = 90*M_PI/180;
-    agent_list.push_back(Agent{{500,500},{cos(temp),sin(temp)}});
+    RandomAgentGenerator(50000,0,RES);
 
     while (!WindowShouldClose()) {
-        // INPUT HANDLING
         if(GetGestureDetected()==GESTURE_DRAG) {
             Vector2 mousePos = GetMousePosition();
             AgentInit(mousePos.x,mousePos.y);
         }
-        DiffuseTexture(10);
+        DiffuseTexture(0);
         BeginDrawing();
         DrawTexture(tux,0,0,WHITE);
         for(int k=0; k<agent_list.size(); ++k) {

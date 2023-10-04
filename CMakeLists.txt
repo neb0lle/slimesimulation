@@ -4,7 +4,7 @@ project(slimesimulation)
 find_package(raylib 3.0 REQUIRED) # Requires at least version 3.0
 
 set(CMAKE_CXX_STANDARD 11) # Requires C++11 standard
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(${PROJECT_NAME} src/main.cpp src/render.cpp)
 
 target_link_libraries(${PROJECT_NAME} raylib)
