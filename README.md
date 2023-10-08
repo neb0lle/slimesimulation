@@ -1,6 +1,6 @@
 #	Physarum polycephalum
 
-![](https://imgur.com/a/RT17DxZ)
+![](https://imgur.com/QNRQ1qJ)
 
 **Usage**: 
 ```
