@@ -27,12 +27,12 @@ extern Color *pixels;
 vector<Agent> agent_list;
 
 Vector2 ResolveAngle(float angle) {
-    angle = angle*M_PI/180;
+    angle = angle*DEG2RAD;
     return {cos(angle),sin(angle)};
 }
 
 double InvResolveAngle(Vector2 rangle) {
-    double theta = std::atan2(rangle.y, rangle.x)*180.0/M_PI;
+    double theta = std::atan2(rangle.y, rangle.x)*RAD2DEG;
     return theta;
 }
 
@@ -115,6 +115,16 @@ void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
         agent_list.push_back(Agent{ randompos, randangle, ResolveAngle(randangle)});
     }
 }
+void RandomAgentGeneratorInCircle(int n, Vector2 center, float radius) {
+    for (int b = 0; b < n; ++b) {
+        float randAngle = static_cast<float>(GetRandomValue(0, 360)); // Random angle in degrees
+        float randRadius = static_cast<float>(GetRandomValue(0, 100)) / 100.0f; // Random value between 0 and 1
+        float angleInRadians = randAngle * DEG2RAD; // Convert degrees to radians
+        float x = center.x + radius * randRadius * cosf(angleInRadians); // Calculate x-coordinate
+        float y = center.y + radius * randRadius * sinf(angleInRadians); // Calculate y-coordinate
+        agent_list.push_back(Agent{Vector2{x, y}, randAngle, ResolveAngle(randAngle)});
+    }
+}
 
 int main() {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -135,8 +145,9 @@ int main() {
     ClearBackground(BLACK);
     CLS(BLACK);
 
-    RandomAgentGenerator(5000,0,RES);
-    SpeciesSettings temp_setting = {1.0f,5.0f,45.0f,5,3,WHITE};
+    // RandomAgentGenerator(7500,1,RES-1);
+    RandomAgentGeneratorInCircle(5000, {500,500},100);
+    SpeciesSettings temp_setting = {1.0f,5.0f,45.0f,5,3,SKYBLUE};
 
     while (!WindowShouldClose()) {
         if(GetGestureDetected()==GESTURE_DRAG) {
