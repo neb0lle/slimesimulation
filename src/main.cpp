@@ -23,107 +23,104 @@ struct SpeciesSettings {
     Color color;
 };
 
-SpeciesSettings temp_setting = {0.5f,0.2f,45.0f,10.0f,5,WHITE};
-
+extern Color *pixels;
 vector<Agent> agent_list;
-extern Color *pixels; // import pixel array from render.cpp
 
-float Sense(Agent agent, SpeciesSettings settings, float angleOffset) {
-    float sensorAngle = agent.angle + settings.sensorAngleOffset;
-    Vector2 sensorDir = {cos(sensorAngle) * settings.sensorOffsetDst, sin(sensorAngle) * settings.sensorOffsetDst};
-    int sensorCentreX = static_cast<int>(agent.position.x + sensorDir.x);
-    int sensorCentreY = static_cast<int>(agent.position.y + sensorDir.y);
+Vector2 ResolveAngle(float angle) {
+    angle = angle*M_PI/180;
+    return {cos(angle),sin(angle)};
+}
+
+double InvResolveAngle(Vector2 rangle) {
+    double theta = std::atan2(rangle.y, rangle.x)*180.0/M_PI;
+    return theta;
+}
+
+float Sense(Agent *agent, SpeciesSettings settings, float angleOffset) {
+    Vector2 sensorAngle = ResolveAngle(agent->angle + angleOffset);
+    Vector2 sensorDir = {sensorAngle.x * settings.sensorOffsetDst, sensorAngle.y * settings.sensorOffsetDst};
+    int sensorCentreX = static_cast<int>(agent->position.x + sensorDir.x);
+    int sensorCentreY = static_cast<int>(agent->position.y + sensorDir.y);
 
     float sum = 0.0;
     for (int offsetX = -settings.sensorSize; offsetX <= settings.sensorSize; offsetX++) {
         for (int offsetY = -settings.sensorSize; offsetY <= settings.sensorSize; offsetY++) {
-            int sampleX = min(RES - 1, max(0, sensorCentreX + offsetX));
-            int sampleY = min(RES - 1, max(0, sensorCentreY + offsetY));
+            int sampleX = min(RES, max(0, sensorCentreX + offsetX));
+            int sampleY = min(RES, max(0, sensorCentreY + offsetY));
             Color sampledColor = pixels[sampleY * RES + sampleX];
             sum += (sampledColor.r + sampledColor.g + sampledColor.b) / 3.0;
         }
     }
-
     return sum;
 }
 
-float UnresolveAngle(Vector2 rangle) {
-    return 0;
-}
-
 void Clamp(Agent *a, float minValue, float maxValue) {
-    // clamp along with recalculation of angle
-    // need offset for certain bounds for angle
-    if (a->position.x < minValue) {
+    if (a->position.x <= minValue) {
         a->position.x = minValue;
         a->rangle.x *= -1;
-        a->angle = UnresolveAngle(a->rangle);
-    } else if (a->position.x > maxValue) {
+        a->angle = InvResolveAngle(a->rangle);
+    } else if (a->position.x >= maxValue) {
         a->position.x = maxValue;
         a->rangle.x *=-1;
-        a->angle = UnresolveAngle(a->rangle);
+        a->angle = InvResolveAngle(a->rangle)+180;
     }
-    if (a->position.y < minValue) {
+    if (a->position.y <= minValue) {
         a->position.y = minValue;
         a->rangle.y *= -1;
-        a->angle = UnresolveAngle(a->rangle);
-    } else if (a->position.y > maxValue) {
+        a->angle = InvResolveAngle(a->rangle);
+    } else if (a->position.y >= maxValue) {
         a->position.y = maxValue;
         a->rangle.y *= -1;
-        a->angle = UnresolveAngle(a->rangle);
+        a->angle = InvResolveAngle(a->rangle)+180;
     }
 }
 
-void UpdateData(Agent &agent, SpeciesSettings settings) {
-    // Calculate sensor readings
-    // to make it single function return instead of 3 times;
+void UpdateData(Agent *agent, SpeciesSettings settings) {
+    // Sense
     float weightForward = Sense(agent, settings,0);
-    float weightLeft = Sense(agent, settings, -settings.sensorAngleOffset);
     float weightRight = Sense(agent, settings, settings.sensorAngleOffset);
+    float weightLeft = Sense(agent, settings, -settings.sensorAngleOffset);
 
-    float randomSteerStrength = static_cast<float>(GetRandomValue(0, 100)) / 100.0f - 0.5f;
-    float turnSpeed = settings.turnSpeed * 2.0f * 3.1415f;
+    // Rotate
     if (weightForward > weightLeft && weightForward > weightRight) {
-        // Continue in the same direction
-    }
-    else if (weightForward < weightLeft && weightForward < weightRight) {
-        // Turn based on random steering strength
-        agent.angle += randomSteerStrength * turnSpeed;
+        // continue
     }
     else if (weightRight > weightLeft) {
-        // Turn right
-        agent.angle -= randomSteerStrength * turnSpeed;
+        agent->angle += settings.turnSpeed;
     }
     else if (weightLeft > weightRight) {
-        // Turn left
-        agent.angle += randomSteerStrength * turnSpeed;
+        agent->angle -= settings.turnSpeed;
     }
+    agent->rangle = ResolveAngle(agent->angle);
 
-    // Update agent's position based on angle and speed
-    agent.position.x += cos(agent.angle) * settings.moveSpeed;
-    agent.position.y += sin(agent.angle) * settings.moveSpeed;
 
-    Clamp(&agent, 0.0f, static_cast<float>(RES));
+    // Move
+    agent->position.x += agent->rangle.x * settings.moveSpeed;
+    agent->position.y += agent->rangle.y * settings.moveSpeed;
+    Clamp(agent, 0.0f, static_cast<float>(RES));
+
+    // Deposit
+    TexPixDraw(agent->position.x,agent->position.y,settings.color);
 }
 
-// Initialize individual agents with random angle at x,y
 void AgentInit(float x, float y) {
     float randangle = GetRandomValue(0,360);
-    agent_list.push_back(Agent{{x,y},randangle});
+    agent_list.push_back(Agent{{x,y},randangle,ResolveAngle(randangle)});
 }
 
-// Initial bulk generation of agents with random angle
 void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
     for(int b=0; b<n; ++b) {
         float randangle = GetRandomValue(0,360);
-        agent_list.push_back(Agent{ { static_cast<float>(GetRandomValue(rangl,rangr)), static_cast<float>(GetRandomValue(rangl,rangr)) }, randangle});
+        Vector2 randompos = {static_cast<float>(GetRandomValue(rangl,rangr)),static_cast<float>(GetRandomValue(rangl,rangr))};
+        agent_list.push_back(Agent{ randompos, randangle, ResolveAngle(randangle)});
     }
 }
 
 int main() {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    SetTargetFPS(120);
+    SetTargetFPS(60);
     InitWindow(RES, RES, "sed");
+
     Image tuxim = {
         .data = pixels,
         .width = RES,
@@ -133,10 +130,13 @@ int main() {
     };
     Texture2D tux = LoadTextureFromImage(tuxim);
     UnloadImage(tuxim);
-    ClearBackground(BLACK);
-    CLS();
-    RandomAgentGenerator(10,0,RES);
 
+
+    ClearBackground(BLACK);
+    CLS(BLACK);
+
+    RandomAgentGenerator(5000,0,RES);
+    SpeciesSettings temp_setting = {1.0f,5.0f,45.0f,5,3,WHITE};
 
     while (!WindowShouldClose()) {
         if(GetGestureDetected()==GESTURE_DRAG) {
@@ -144,17 +144,17 @@ int main() {
             AgentInit(mousePos.x,mousePos.y);
         }
 
-        // sense rotate move
-        UpdateTexture(tux,pixels);
-
-        BeginDrawing(); // deposit
-        DrawTexture(tux,0,0,WHITE);
         for(int k=0; k<agent_list.size(); ++k) {
-            UpdateData(agent_list[k],temp_setting);
+            UpdateData(&agent_list[k],temp_setting); // sense rotate move
         }
+        UpdateTexture(tux,pixels); // deposit
+
+        BeginDrawing();
+        DrawTexture(tux,0,0,WHITE);
         EndDrawing();
 
-        // DDTexture(.1,1); // diffuse and decay
+        DDTexture(.1,1);
     }
     UnloadTexture(tux);
+    // freeParray(pixels);
 }

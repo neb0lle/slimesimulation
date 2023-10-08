@@ -29,12 +29,17 @@ void TexPixDraw(int x,int y, Color col) {
     pixels[y*RES+x] = col;
 }
 
-void CLS() {
+void CLS(Color c) {
     for(int i=0; i<RES; ++i) {
         for(int j=0; j<RES; ++j) {
-            pixels[i*RES+j] = BLACK;
+            pixels[i*RES+j] = c;
         }
     }
+}
+
+void freeParray(Color* p) {
+    free(p);
+    p = NULL;
 }
 
 void DDTexture(float diffuseWeight, float decayRate) {
