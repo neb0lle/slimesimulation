@@ -117,11 +117,11 @@ void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
 }
 void RandomAgentGeneratorInCircle(int n, Vector2 center, float radius) {
     for (int b = 0; b < n; ++b) {
-        float randAngle = static_cast<float>(GetRandomValue(0, 360)); // Random angle in degrees
-        float randRadius = static_cast<float>(GetRandomValue(0, 100)) / 100.0f; // Random value between 0 and 1
-        float angleInRadians = randAngle * DEG2RAD; // Convert degrees to radians
-        float x = center.x + radius * randRadius * cosf(angleInRadians); // Calculate x-coordinate
-        float y = center.y + radius * randRadius * sinf(angleInRadians); // Calculate y-coordinate
+        float randAngle = static_cast<float>(GetRandomValue(0, 360));
+        float randRadius = static_cast<float>(GetRandomValue(0, 100)) / 100.0f;
+        float angleInRadians = randAngle * DEG2RAD;
+        float x = center.x + radius * randRadius * cosf(angleInRadians);
+        float y = center.y + radius * randRadius * sinf(angleInRadians);
         agent_list.push_back(Agent{Vector2{x, y}, randAngle, ResolveAngle(randAngle)});
     }
 }
@@ -146,7 +146,7 @@ int main() {
     CLS(BLACK);
 
     // RandomAgentGenerator(7500,1,RES-1);
-    RandomAgentGeneratorInCircle(5000, {500,500},100);
+    RandomAgentGeneratorInCircle(10000, {500,500},300);
     SpeciesSettings temp_setting = {1.0f,5.0f,45.0f,5,3,SKYBLUE};
 
     while (!WindowShouldClose()) {

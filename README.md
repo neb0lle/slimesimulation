@@ -1,5 +1,7 @@
 #	Physarum polycephalum
 
+![](https://imgur.com/a/RT17DxZ)
+
 **Usage**: 
 ```
 git clone https://github.com/s3dman/slimesimulation.git
