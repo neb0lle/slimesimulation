@@ -1,5 +1,6 @@
 #include <iostream>
 #include <raylib.h>
+#include <algorithm>
 #include "render.h"
 
 const int RES = 1000;
@@ -36,26 +37,40 @@ void CLS() {
     }
 }
 
-void DiffuseTexture(float diffstrength) {
-    for(int i=0; i<RES; ++i) {
-        for(int j=0; j<RES; ++j) {
-            // diffuse each pixel value intensity each frame (all 3 components)
-            pixels[i*RES+j].r -= diffstrength;
-            pixels[i*RES+j].g -= diffstrength;
-            pixels[i*RES+j].b -= diffstrength;
+void DDTexture(float diffuseWeight, float decayRate) {
+    Color newPixels[RES * RES];
 
-            // set pixel intensity as average value of neighbouring 3x3 pixel
-            int av_sum = 0;
-            for(int k=-1; k<2; ++k) {
-                for(int l=-1; l<2; ++l) {
-                    av_sum += pixels[(i+k)*RES+(j+l)].r;
+    for (int i = 0; i < RES; ++i) {
+        for (int j = 0; j < RES; ++j) {
+
+
+            newPixels[i * RES + j].r = std::max(0.0, pixels[i * RES + j].r * (1.0-diffuseWeight));
+            newPixels[i * RES + j].g = std::max(0.0, pixels[i * RES + j].g * (1.0-diffuseWeight));
+            newPixels[i * RES + j].b = std::max(0.0, pixels[i * RES + j].b * (1.0-diffuseWeight));
+
+            int av_sum[3] = {0,0,0};
+
+            for (int k = -1; k <= 1; ++k) {
+                for (int l = -1; l <= 1; ++l) {
+                    int x = i + k;
+                    int y = j + l;
+                    if (x >= 0 && x < RES && y >= 0 && y < RES) {
+                        av_sum[0] += pixels[x * RES + y].r;
+                        av_sum[1] += pixels[x * RES + y].g;
+                        av_sum[2] += pixels[x * RES + y].b;
+                    }
                 }
             }
-            av_sum /= 9;
-            pixels[i*RES+j].r = av_sum;
-            pixels[i*RES+j].g = av_sum;
-            pixels[i*RES+j].b = av_sum;
-
+            newPixels[i * RES + j].r = av_sum[0] / 9;
+            newPixels[i * RES + j].g = av_sum[1] / 9;
+            newPixels[i * RES + j].b = av_sum[2] / 9;
         }
+    }
+
+    // Decay the pixel values based on decayRate and Copy the updated pixel values back to the original array
+    for (int i = 0; i < RES * RES; ++i) {
+        pixels[i].r = std::max(0.0,static_cast<double>(newPixels[i].r-decayRate));
+        pixels[i].g = std::max(0.0,static_cast<double>(newPixels[i].g-decayRate));
+        pixels[i].b = std::max(0.0,static_cast<double>(newPixels[i].b-decayRate));
     }
 }
