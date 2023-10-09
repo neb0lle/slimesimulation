@@ -20,11 +20,13 @@ struct SpeciesSettings {
     float sensorAngleOffset;
     float sensorOffsetDst;
     int sensorSize;
+    int agentSize;
     Color color;
 };
 
 extern Color *pixels;
-vector<Agent> agent_list;
+// vector<Agent> agent_list;
+vector<pair<vector<Agent>,SpeciesSettings>> agent_list_1;
 
 Vector2 ResolveAngle(float angle) {
     angle = angle*DEG2RAD;
@@ -100,30 +102,40 @@ void UpdateData(Agent *agent, SpeciesSettings settings) {
     Clamp(agent, 0.0f, static_cast<float>(RES));
 
     // Deposit
-    TexPixDraw(agent->position.x,agent->position.y,settings.color);
-}
+    int size = settings.agentSize/2;
+    for(int i=-size; i<=size; i++) {
+        for(int j=-size; j<=size; j++) {
+            TexPixDraw(agent->position.x+i,agent->position.y+j,settings.color);
+        }
 
-void AgentInit(float x, float y) {
-    float randangle = GetRandomValue(0,360);
-    agent_list.push_back(Agent{{x,y},randangle,ResolveAngle(randangle)});
-}
-
-void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
-    for(int b=0; b<n; ++b) {
-        float randangle = GetRandomValue(0,360);
-        Vector2 randompos = {static_cast<float>(GetRandomValue(rangl,rangr)),static_cast<float>(GetRandomValue(rangl,rangr))};
-        agent_list.push_back(Agent{ randompos, randangle, ResolveAngle(randangle)});
     }
+// TexPixDraw(agent->position.x,agent->position.y,settings.color);
 }
-void RandomAgentGeneratorInCircle(int n, Vector2 center, float radius) {
-    for (int b = 0; b < n; ++b) {
+
+// void AgentInit(float x, float y) {
+//     float randangle = GetRandomValue(0,360);
+//     agent_list.push_back(Agent{{x,y},randangle,ResolveAngle(randangle)});
+// }
+//
+// void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
+//     for(int b=0; b<n; ++b) {
+//         float randangle = GetRandomValue(0,360);
+//         Vector2 randompos = {static_cast<float>(GetRandomValue(rangl,rangr)),static_cast<float>(GetRandomValue(rangl,rangr))};
+//         agent_list.push_back(Agent{ randompos, randangle, ResolveAngle(randangle)});
+//     }
+// }
+
+void RandomAgentGeneratorInCircle(int n, Vector2 center, float minradius, float maxradius, SpeciesSettings settings) {
+    vector<Agent> agent_list;
+    while(n--) {
         float randAngle = static_cast<float>(GetRandomValue(0, 360));
-        float randRadius = static_cast<float>(GetRandomValue(0, 100)) / 100.0f;
+        float randRadius = static_cast<float>(GetRandomValue(minradius, maxradius));
         float angleInRadians = randAngle * DEG2RAD;
-        float x = center.x + radius * randRadius * cosf(angleInRadians);
-        float y = center.y + radius * randRadius * sinf(angleInRadians);
-        agent_list.push_back(Agent{Vector2{x, y}, randAngle, ResolveAngle(randAngle)});
+        float x = center.x +  randRadius * cos(angleInRadians);
+        float y = center.y +  randRadius * sin(angleInRadians);
+        agent_list.push_back(Agent{{x,y},randAngle,ResolveAngle(randAngle)});
     }
+    agent_list_1.push_back({agent_list,settings});
 }
 
 int main() {
@@ -146,18 +158,30 @@ int main() {
     CLS(BLACK);
 
     // RandomAgentGenerator(7500,1,RES-1);
-    RandomAgentGeneratorInCircle(10000, {500,500},300);
-    SpeciesSettings temp_setting = {1.0f,5.0f,45.0f,5,3,SKYBLUE};
+
+    SpeciesSettings setting1 = {1.0f,5.0f,45.0f,5,3,1,WHITE};
+    // SpeciesSettings setting2 = {1.0f,10.0f,30.0f,5,3,SKYBLUE};
+    // SpeciesSettings setting3 = {1.0f,5.0f,45.0f,5,3,GREEN};
+    // RandomAgentGeneratorInCircle(1000, {500,500},200,300,setting3);
+    // RandomAgentGeneratorInCircle(1000, {500,500},100,200,setting2);
+    RandomAgentGeneratorInCircle(5000, {500,500},0,250,setting1);
 
     while (!WindowShouldClose()) {
-        if(GetGestureDetected()==GESTURE_DRAG) {
-            Vector2 mousePos = GetMousePosition();
-            AgentInit(mousePos.x,mousePos.y);
+        // if(GetGestureDetected()==GESTURE_DRAG) {
+        //     Vector2 mousePos = GetMousePosition();
+        //     AgentInit(mousePos.x,mousePos.y);
+        // }
+
+        // for(int k=0; k<agent_list.size(); ++k) {
+        //     UpdateData(&agent_list[k],temp_setting); // sense rotate move
+        // }
+        //
+        for(int k=0; k<agent_list_1.size(); ++k) {
+            for(int l=0; l<agent_list_1[k].first.size(); l++) {
+                UpdateData(&agent_list_1[k].first[l],agent_list_1[k].second);
+            }
         }
 
-        for(int k=0; k<agent_list.size(); ++k) {
-            UpdateData(&agent_list[k],temp_setting); // sense rotate move
-        }
         UpdateTexture(tux,pixels); // deposit
 
         BeginDrawing();
