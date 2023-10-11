@@ -6,7 +6,11 @@ Simulation of Physarum polycephalum, a type of slime mold. It runs on multiple p
 
 ### Prerequisites
 
-Make sure you have [`raylib`](https://github.com/raysan5/raylib) `>=3.0` installed on your system.
+Before using this project, make sure you have the following dependencies installed on your system:
+
+- [`raylib`](https://github.com/raysan5/raylib) `>=3.0`
+
+- [CMake](https://cmake.org/) `>=3.15`
 
 ### Installation & Running
 
