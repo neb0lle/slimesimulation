@@ -166,8 +166,8 @@ int main() {
     // SpeciesSettings setting3 = {1.0f,5.0f,45.0f,5,3,GREEN};
     // RandomAgentGeneratorInCircle(1000, {500,500},200,300,setting3);
     // RandomAgentGeneratorInCircle(1000, {500,500},100,200,setting2);
-    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting1);
-    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting2);
+    // RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting1);
+    // RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting2);
 
     while (!WindowShouldClose()) {
         // if(GetGestureDetected()==GESTURE_DRAG) {
@@ -195,5 +195,5 @@ int main() {
         printf("%d\n",GetFPS());
     }
     UnloadTexture(tux);
-    freeParray(pixels);
+    // freeParray(pixels);
 }

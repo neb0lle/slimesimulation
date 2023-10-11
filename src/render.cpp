@@ -4,7 +4,7 @@
 #include "render.h"
 
 const int RES = 1000;
-Color *pixels = (Color *)malloc(RES*RES*sizeof(Color)); // 2 for doubling the linear matrix size to avoid segmentation faults
+Color *pixels = (Color *)calloc(RES*RES,sizeof(Color)); // 2 for doubling the linear matrix size to avoid segmentation faults
 
 uint hash_func(uint state) {
     state ^= 2747636419u;
