@@ -140,7 +140,7 @@ void RandomAgentGeneratorInCircle(int n, Vector2 center, float minradius, float 
 
 int main() {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    SetTargetFPS(60);
+    SetTargetFPS(1000);
     InitWindow(RES, RES, "sed");
 
     Image tuxim = {
@@ -158,13 +158,16 @@ int main() {
     CLS(BLACK);
 
     // RandomAgentGenerator(7500,1,RES-1);
+    Color CY = GetColor(0xffef00ff);
 
-    SpeciesSettings setting1 = {1.0f,5.0f,45.0f,5,3,1,WHITE};
+    SpeciesSettings setting1 = {1.0f,5.0f,75.0f,5,3,1,CY};
+    SpeciesSettings setting2 = {1.0f,5.0f,75.0f,5,3,1,SKYBLUE};
     // SpeciesSettings setting2 = {1.0f,10.0f,30.0f,5,3,SKYBLUE};
     // SpeciesSettings setting3 = {1.0f,5.0f,45.0f,5,3,GREEN};
     // RandomAgentGeneratorInCircle(1000, {500,500},200,300,setting3);
     // RandomAgentGeneratorInCircle(1000, {500,500},100,200,setting2);
-    RandomAgentGeneratorInCircle(5000, {500,500},0,250,setting1);
+    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting1);
+    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting2);
 
     while (!WindowShouldClose()) {
         // if(GetGestureDetected()==GESTURE_DRAG) {
@@ -189,7 +192,8 @@ int main() {
         EndDrawing();
 
         DDTexture(.1,1);
+        printf("%d\n",GetFPS());
     }
     UnloadTexture(tux);
-    // freeParray(pixels);
+    freeParray(pixels);
 }

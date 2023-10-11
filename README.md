@@ -1,8 +1,9 @@
 #	Physarum polycephalum
+Simulation of Physarum polycephalum, a type of slime mold. It runs on multiple parameters to replicate and simulate the organism's behaviour in a digital environment.
 
 ![](https://i.imgur.com/QNRQ1qJ.png)
 
-**Usage**: 
+**Setup**: 
 ```
 git clone https://github.com/s3dman/slimesimulation.git
 cd slimesimulation
