@@ -32,4 +32,4 @@ This project is based on 2010 research paper ["Towards a Physarum Learning Chip"
 This project is inspired from Sage Jenson's [physarum](https://cargocollective.com/sagejenson/physarum) project.
 
 ## Author
-[Neville](https://github.com/s3dman)
+- [Neville](https://github.com/s3dman)
