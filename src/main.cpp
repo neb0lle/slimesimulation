@@ -1,12 +1,13 @@
 #include <raylib.h>
 #include <vector>
 #include <cmath>
+#include <algorithm>
 #include <iostream>
 #include "render.h"
 
 using namespace std;
 
-const int RES=1000;
+const int RES = 1000;
 
 struct Agent {
     Vector2 position;
@@ -22,19 +23,19 @@ struct SpeciesSettings {
     int sensorSize;
     int agentSize;
     Color color;
+    int zIndex;  // Add zIndex member for Z index
 };
 
 extern Color *pixels;
-// vector<Agent> agent_list;
-vector<pair<vector<Agent>,SpeciesSettings>> agent_list_1;
+vector<pair<vector<Agent>, SpeciesSettings>> agent_list_1;
 
 Vector2 ResolveAngle(float angle) {
-    angle = angle*DEG2RAD;
-    return {cos(angle),sin(angle)};
+    angle = angle * DEG2RAD;
+    return {cos(angle), sin(angle)};
 }
 
 double InvResolveAngle(Vector2 rangle) {
-    double theta = std::atan2(rangle.y, rangle.x)*RAD2DEG;
+    double theta = std::atan2(rangle.y, rangle.x) * RAD2DEG;
     return theta;
 }
 
@@ -47,8 +48,8 @@ float Sense(Agent *agent, SpeciesSettings settings, float angleOffset) {
     float sum = 0.0;
     for (int offsetX = -settings.sensorSize; offsetX <= settings.sensorSize; offsetX++) {
         for (int offsetY = -settings.sensorSize; offsetY <= settings.sensorSize; offsetY++) {
-            int sampleX = min(RES, max(0, sensorCentreX + offsetX));
-            int sampleY = min(RES, max(0, sensorCentreY + offsetY));
+            int sampleX = std::min(RES, std::max(0, sensorCentreX + offsetX));
+            int sampleY = std::min(RES, std::max(0, sensorCentreY + offsetY));
             Color sampledColor = pixels[sampleY * RES + sampleX];
             sum += (sampledColor.r + sampledColor.g + sampledColor.b) / 3.0;
         }
@@ -63,8 +64,8 @@ void Clamp(Agent *a, float minValue, float maxValue) {
         a->angle = InvResolveAngle(a->rangle);
     } else if (a->position.x >= maxValue) {
         a->position.x = maxValue;
-        a->rangle.x *=-1;
-        a->angle = InvResolveAngle(a->rangle)+180;
+        a->rangle.x *= -1;
+        a->angle = InvResolveAngle(a->rangle) + 180;
     }
     if (a->position.y <= minValue) {
         a->position.y = minValue;
@@ -73,69 +74,47 @@ void Clamp(Agent *a, float minValue, float maxValue) {
     } else if (a->position.y >= maxValue) {
         a->position.y = maxValue;
         a->rangle.y *= -1;
-        a->angle = InvResolveAngle(a->rangle)+180;
+        a->angle = InvResolveAngle(a->rangle) + 180;
     }
 }
 
 void UpdateData(Agent *agent, SpeciesSettings settings) {
-    // Sense
-    float weightForward = Sense(agent, settings,0);
+    float weightForward = Sense(agent, settings, 0);
     float weightRight = Sense(agent, settings, settings.sensorAngleOffset);
     float weightLeft = Sense(agent, settings, -settings.sensorAngleOffset);
 
-    // Rotate
     if (weightForward > weightLeft && weightForward > weightRight) {
         // continue
-    }
-    else if (weightRight > weightLeft) {
+    } else if (weightRight > weightLeft) {
         agent->angle += settings.turnSpeed;
-    }
-    else if (weightLeft > weightRight) {
+    } else if (weightLeft > weightRight) {
         agent->angle -= settings.turnSpeed;
     }
     agent->rangle = ResolveAngle(agent->angle);
 
-
-    // Move
     agent->position.x += agent->rangle.x * settings.moveSpeed;
     agent->position.y += agent->rangle.y * settings.moveSpeed;
     Clamp(agent, 0.0f, static_cast<float>(RES));
 
-    // Deposit
-    int size = settings.agentSize/2;
-    for(int i=-size; i<=size; i++) {
-        for(int j=-size; j<=size; j++) {
-            TexPixDraw(agent->position.x+i,agent->position.y+j,settings.color);
+    int size = settings.agentSize / 2;
+    for (int i = -size; i <= size; i++) {
+        for (int j = -size; j <= size; j++) {
+            TexPixDraw(agent->position.x + i, agent->position.y + j, settings.color);
         }
-
     }
-// TexPixDraw(agent->position.x,agent->position.y,settings.color);
 }
-
-// void AgentInit(float x, float y) {
-//     float randangle = GetRandomValue(0,360);
-//     agent_list.push_back(Agent{{x,y},randangle,ResolveAngle(randangle)});
-// }
-//
-// void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
-//     for(int b=0; b<n; ++b) {
-//         float randangle = GetRandomValue(0,360);
-//         Vector2 randompos = {static_cast<float>(GetRandomValue(rangl,rangr)),static_cast<float>(GetRandomValue(rangl,rangr))};
-//         agent_list.push_back(Agent{ randompos, randangle, ResolveAngle(randangle)});
-//     }
-// }
 
 void RandomAgentGeneratorInCircle(int n, Vector2 center, float minradius, float maxradius, SpeciesSettings settings) {
     vector<Agent> agent_list;
-    while(n--) {
+    while (n--) {
         float randAngle = static_cast<float>(GetRandomValue(0, 360));
         float randRadius = static_cast<float>(GetRandomValue(minradius, maxradius));
         float angleInRadians = randAngle * DEG2RAD;
-        float x = center.x +  randRadius * cos(angleInRadians);
-        float y = center.y +  randRadius * sin(angleInRadians);
-        agent_list.push_back(Agent{{x,y},randAngle,ResolveAngle(randAngle)});
+        float x = center.x + randRadius * cos(angleInRadians);
+        float y = center.y + randRadius * sin(angleInRadians);
+        agent_list.push_back(Agent{{x, y}, randAngle, ResolveAngle(randAngle)});
     }
-    agent_list_1.push_back({agent_list,settings});
+    agent_list_1.push_back({agent_list, settings});
 }
 
 int main() {
@@ -153,47 +132,40 @@ int main() {
     Texture2D tux = LoadTextureFromImage(tuxim);
     UnloadImage(tuxim);
 
-
     ClearBackground(BLACK);
     CLS(BLACK);
 
-    // RandomAgentGenerator(7500,1,RES-1);
     Color CY = GetColor(0xffef00ff);
 
-    SpeciesSettings setting1 = {1.0f,5.0f,75.0f,5,3,1,CY};
-    SpeciesSettings setting2 = {1.0f,5.0f,75.0f,5,3,1,SKYBLUE};
-    // SpeciesSettings setting2 = {1.0f,10.0f,30.0f,5,3,SKYBLUE};
-    // SpeciesSettings setting3 = {1.0f,5.0f,45.0f,5,3,GREEN};
-    // RandomAgentGeneratorInCircle(1000, {500,500},200,300,setting3);
-    // RandomAgentGeneratorInCircle(1000, {500,500},100,200,setting2);
-    // RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting1);
-    // RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting2);
+    SpeciesSettings setting1 = {1.0f, 5.0f, 75.0f, 5, 3, 1, CY, 1};
+    SpeciesSettings setting2 = {1.0f, 5.0f, 75.0f, 5, 3, 1, SKYBLUE, 2};
 
     while (!WindowShouldClose()) {
-        // if(GetGestureDetected()==GESTURE_DRAG) {
-        //     Vector2 mousePos = GetMousePosition();
-        //     AgentInit(mousePos.x,mousePos.y);
-        // }
+        std::sort(agent_list_1.begin(), agent_list_1.end(), [](const auto &a, const auto &b) {
+            return a.second.zIndex < b.second.zIndex;
+        });
 
-        // for(int k=0; k<agent_list.size(); ++k) {
-        //     UpdateData(&agent_list[k],temp_setting); // sense rotate move
-        // }
-        //
-        for(int k=0; k<agent_list_1.size(); ++k) {
-            for(int l=0; l<agent_list_1[k].first.size(); l++) {
-                UpdateData(&agent_list_1[k].first[l],agent_list_1[k].second);
+        for (int k = 0; k < agent_list_1.size(); ++k) {
+            for (int l = 0; l < agent_list_1[k].first.size(); l++) {
+                UpdateData(&agent_list_1[k].first[l], agent_list_1[k].second);
             }
         }
 
-        UpdateTexture(tux,pixels); // deposit
+        for (const auto &species : agent_list_1) {
+            for (const Agent &agent : species.first) {
+                DrawTexture(tux, agent.position.x, agent.position.y, WHITE);
+            }
+        }
+
+        UpdateTexture(tux, pixels);
 
         BeginDrawing();
-        DrawTexture(tux,0,0,WHITE);
+        DrawTexture(tux, 0, 0, WHITE);
         EndDrawing();
 
-        DDTexture(.1,1);
-        printf("%d\n",GetFPS());
+        DDTexture(.1, 1);
+        printf("%d\n", GetFPS());
     }
+
     UnloadTexture(tux);
-    // freeParray(pixels);
 }
