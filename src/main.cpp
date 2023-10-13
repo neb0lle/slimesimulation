@@ -148,26 +148,23 @@ int main() {
         .width = RES,
         .height = RES,
         .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-        .mipmaps = 1
     };
+    tuxim.mipmaps = 1;
     Texture2D tux = LoadTextureFromImage(tuxim);
-    UnloadImage(tuxim);
 
 
     ClearBackground(BLACK);
     CLS(BLACK);
 
     // RandomAgentGenerator(7500,1,RES-1);
+
     Color CY = GetColor(0xffef00ff);
 
     SpeciesSettings setting1 = {1.0f,5.0f,75.0f,5,3,1,CY};
     SpeciesSettings setting2 = {1.0f,5.0f,75.0f,5,3,1,SKYBLUE};
-    // SpeciesSettings setting2 = {1.0f,10.0f,30.0f,5,3,SKYBLUE};
-    // SpeciesSettings setting3 = {1.0f,5.0f,45.0f,5,3,GREEN};
-    // RandomAgentGeneratorInCircle(1000, {500,500},200,300,setting3);
-    // RandomAgentGeneratorInCircle(1000, {500,500},100,200,setting2);
-    // RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting1);
-    // RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting2);
+
+    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting1);
+    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting2);
 
     while (!WindowShouldClose()) {
         // if(GetGestureDetected()==GESTURE_DRAG) {
@@ -178,7 +175,8 @@ int main() {
         // for(int k=0; k<agent_list.size(); ++k) {
         //     UpdateData(&agent_list[k],temp_setting); // sense rotate move
         // }
-        //
+
+
         for(int k=0; k<agent_list_1.size(); ++k) {
             for(int l=0; l<agent_list_1[k].first.size(); l++) {
                 UpdateData(&agent_list_1[k].first[l],agent_list_1[k].second);
@@ -195,5 +193,6 @@ int main() {
         printf("%d\n",GetFPS());
     }
     UnloadTexture(tux);
+    UnloadImage(tuxim);
     // freeParray(pixels);
 }
