@@ -1,8 +1,8 @@
 # Physarum polycephalum
 
-[![GitHub stars](https://img.shields.io/github/stars/acmpesuecc/slimesimulation)](https://github.com/acmpesuecc/slimesimulation/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/acmpesuecc/slimesimulation)](https://github.com/acmpesuecc/slimesimulation/issues)
-[![GitHub license](https://img.shields.io/github/license/acmpesuecc/slimesimulation)](https://github.com/acmpesuecc/slimesimulation/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/s3dman/slimesimulation)](https://github.com/s3dkaj/slimesimulation/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/s3dman/slimesimulation)](https://github.com/s3dman/slimesimulation/issues)
+[![GitHub license](https://img.shields.io/github/license/s3dman/slimesimulation)](https://github.com/s3dman/slimesimulation/blob/main/LICENSE)
 
 Simulation of Physarum polycephalum, a type of slime mold. It runs on multiple parameters to replicate and simulate the organism's behaviour in a digital environment.
 
