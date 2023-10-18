@@ -25,8 +25,8 @@ struct SpeciesSettings {
 };
 
 extern Color *pixels;
-// vector<Agent> agent_list;
-vector<pair<vector<Agent>,SpeciesSettings>> agent_list_1;
+
+vector<pair<vector<Agent>,SpeciesSettings>> agent_list;
 
 Vector2 ResolveAngle(float angle) {
     angle = angle*DEG2RAD;
@@ -109,33 +109,36 @@ void UpdateData(Agent *agent, SpeciesSettings settings) {
         }
 
     }
-// TexPixDraw(agent->position.x,agent->position.y,settings.color);
+ // TexPixDraw(agent->position.x,agent->position.y,settings.color);
 }
 
-// void AgentInit(float x, float y) {
-//     float randangle = GetRandomValue(0,360);
-//     agent_list.push_back(Agent{{x,y},randangle,ResolveAngle(randangle)});
-// }
-//
-// void RandomAgentGenerator(int n, int rangl=0, int rangr=RES) {
-//     for(int b=0; b<n; ++b) {
-//         float randangle = GetRandomValue(0,360);
-//         Vector2 randompos = {static_cast<float>(GetRandomValue(rangl,rangr)),static_cast<float>(GetRandomValue(rangl,rangr))};
-//         agent_list.push_back(Agent{ randompos, randangle, ResolveAngle(randangle)});
-//     }
-// }
+//void AgentInit(float x, float y,settings) {
+  //   float randangle = GetRandomValue(0,360);
+    //agent_list.push_back({Agent{{x,y},randangle,ResolveAngle(randangle)},settings});
+ //}
+
+ void RandomAgentGenerator(int n, int rangl, int rangr ,SpeciesSettings settings) {
+     vector<Agent> temp;
+     for(int b=0; b<n; ++b) {
+         float randangle = GetRandomValue(0,360);
+         Vector2 randompos = {static_cast<float>(GetRandomValue(rangl,rangr)),static_cast<float>(GetRandomValue(rangl,rangr))};
+         temp.push_back(Agent{ randompos, randangle, ResolveAngle(randangle)});
+     }
+     agent_list.push_back({temp,settings});
+ }
+ 
 
 void RandomAgentGeneratorInCircle(int n, Vector2 center, float minradius, float maxradius, SpeciesSettings settings) {
-    vector<Agent> agent_list;
+    vector<Agent> temp;
     while(n--) {
         float randAngle = static_cast<float>(GetRandomValue(0, 360));
         float randRadius = static_cast<float>(GetRandomValue(minradius, maxradius));
         float angleInRadians = randAngle * DEG2RAD;
         float x = center.x +  randRadius * cos(angleInRadians);
         float y = center.y +  randRadius * sin(angleInRadians);
-        agent_list.push_back(Agent{{x,y},randAngle,ResolveAngle(randAngle)});
+        temp.push_back(Agent{{x,y},randAngle,ResolveAngle(randAngle)});
     }
-    agent_list_1.push_back({agent_list,settings});
+    agent_list.push_back({temp,settings});
 }
 
 int main() {
@@ -156,15 +159,15 @@ int main() {
     ClearBackground(BLACK);
     CLS(BLACK);
 
-    // RandomAgentGenerator(7500,1,RES-1);
-
     Color CY = GetColor(0xffef00ff);
 
     SpeciesSettings setting1 = {1.0f,5.0f,75.0f,5,3,1,CY};
     SpeciesSettings setting2 = {1.0f,5.0f,75.0f,5,3,1,SKYBLUE};
 
-    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting1);
-    RandomAgentGeneratorInCircle(7500, {500,500},0,300,setting2);
+   RandomAgentGenerator(100,1,RES-1,setting1);
+RandomAgentGenerator(100,1,RES-1,setting2);
+    RandomAgentGeneratorInCircle(100, {500,500},0,300,setting1);
+    RandomAgentGeneratorInCircle(100, {500,500},0,300,setting2);
 
     while (!WindowShouldClose()) {
         // if(GetGestureDetected()==GESTURE_DRAG) {
@@ -172,14 +175,9 @@ int main() {
         //     AgentInit(mousePos.x,mousePos.y);
         // }
 
-        // for(int k=0; k<agent_list.size(); ++k) {
-        //     UpdateData(&agent_list[k],temp_setting); // sense rotate move
-        // }
-
-
-        for(int k=0; k<agent_list_1.size(); ++k) {
-            for(int l=0; l<agent_list_1[k].first.size(); l++) {
-                UpdateData(&agent_list_1[k].first[l],agent_list_1[k].second);
+        for(int k=0; k<agent_list.size(); ++k) {
+            for(int l=0; l<agent_list[k].first.size(); l++) {
+                UpdateData(&agent_list[k].first[l],agent_list[k].second);
             }
         }
 
