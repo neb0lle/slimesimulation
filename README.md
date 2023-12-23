@@ -4,7 +4,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/s3dman/slimesimulation)](https://github.com/s3dman/slimesimulation/issues)
 [![GitHub license](https://img.shields.io/github/license/s3dman/slimesimulation)](https://github.com/s3dman/slimesimulation/blob/main/LICENSE)
 
-Simulation of Physarum polycephalum, a type of slime mold using cellular atomata.
+Simulation of Physarum polycephalum - a type of slime mold, using cellular atomata.
 
 ![Physarum polycephalum](https://i.imgur.com/QNRQ1qJ.png)
 
